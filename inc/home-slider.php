@@ -1,5 +1,5 @@
 <?php
-$slider_home = velocitytheme_option('slider_home');
+$slider_home = velocity_toko26_slider();
 $ns = 1;
 ?>
 
@@ -9,7 +9,7 @@ $ns = 1;
             <?php foreach( $slider_home as $key => $data): ?>
                 <div class="<?php echo $ns==1?'carousel-item active':'carousel-item'; ?>" data-bs-interval="3000">
                     <div>
-                        <img class="lazyload w-100" data-src="<?php echo $data['imgslider']; ?>" alt="Slider <?php echo $ns; ?>" loading="lazy">
+                        <img class="w-100" src="<?php echo esc_url($data); ?>" alt="Slider <?php echo $ns; ?>" loading="lazy">
                     </div>
                 </div>
             <?php 

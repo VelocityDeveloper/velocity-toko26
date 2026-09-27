@@ -3,13 +3,13 @@
 /**
  * Template Name: Velocity Toko Pricelist
  *
- * @package velocity-toko
+ * @package justg
  */
 
 get_header();
 $container        = get_theme_mod('justg_container_type', 'container');
 $search_query     = new WP_Query(array(
-    'post_type'         => 'product',
+    'post_type'         => 'store_product',
     'post_status'       => 'publish',
     'order'             => 'asc',
     'orderby'           => 'title',
@@ -19,56 +19,44 @@ $search_query     = new WP_Query(array(
 
 <div class="wrapper" id="page-wrapper">
 
-    <div class="<?php echo esc_attr($container); ?> p-0" id="content">
+    <div class="<?php echo esc_attr($container); ?>" id="content">
 
-        <div class="btn-print mb-3">
-            <?php echo do_shortcode('[print targetid="main"]'); ?>
-        </div>
+        <div class="row">
 
-        <div class="row mx-0">
             <div class="content-area col order-2" id="primary">
+
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <?php the_title('<h5 class="fw-bold colortheme m-0">', '</h5>'); ?>
+                    <?php the_title('<h1 class="entry-title fs-4 m-0">', '</h1>'); ?>
+                    <span>
+                        <button type="button" class="btn btn-sm bg-colortheme text-white d-print-none" onclick="window.print()">Cetak</button>
+                    </span>
                 </div>
 
                 <main class="site-main mt-3" id="main">
                     <?php if ($search_query->have_posts()) : ?>
                         <div class="table-responsive">
                             <table class="table">
-                                <thead class="bg-gray">
-                                    <tr>
-                                        <th scope="col">Kode</th>
-                                        <th scope="col">Nama Barang</th>
-                                        <th scope="col">Gambar</th>
-                                        <th scope="col">Stok</th>
-                                        <th scope="col">Berat</th>
-                                        <th scope="col">Harga</th>
-                                    </tr>
+                                <thead class="table-dark">
+                                    <th>Kode</th>
+                                    <th>Nama Barang</th>
+                                    <th>Gambar</th>
+                                    <th>Stok</th>
+                                    <th>Berat</th>
+                                    <th>Harga</th>
                                 </thead>
                                 <tbody>
-                                    <?php while ($search_query->have_posts()) : $search_query->the_post();
-                                        $title = wp_trim_words(get_the_title(), '5');
-                                        $sku        = get_post_meta(get_the_ID(), 'sku', true);
-                                        $stock      = get_post_meta(get_the_ID(), 'stok', true);
-                                        if ($stock == '') {
-                                            $stock = 'Stok Tersedia';
-                                        } else if ($stock == '0') {
-                                            $stock = 'Stok Tidak Tersedia';
-                                        }
-                                        $berat      = get_post_meta(get_the_ID(), 'berat', true);
-                                        $berat      = !empty($berat) ? $berat . ' Kg' : '-';
-                                    ?>
+                                    <?php while ($search_query->have_posts()) : $search_query->the_post(); ?>
                                         <tr>
-                                            <td scope="col"><?php echo $sku; ?></td>
-                                            <td scope="col">
-                                                <h6><a class="text-dark" href="<?php echo get_the_permalink(); ?>"><?php echo $title; ?></a></h6>
+                                            <?php // Meta produk VD Store (_store_sku, _store_stock, _store_weight_kg).
+                                            $berat = get_post_meta(get_the_ID(), '_store_weight_kg', true); ?>
+                                            <td><?php echo esc_html(get_post_meta(get_the_ID(), '_store_sku', true)); ?></td>
+                                            <td><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></td>
+                                            <td>
+                                                <div class="ratio ratio-1x1" style="max-width:80px"><?php echo do_shortcode('[wp_store_thumbnail width="80" height="80" crop="true" label="false" hover="none"]'); ?></div>
                                             </td>
-                                            <td scope="col"><?php echo do_shortcode("[thumbnail width='300' height='300' crop='false' upscale='true']"); ?></td>
-                                            <td scope="col"><?php echo $stock; ?></td>
-                                            <td scope="col" style="max-width:50px;"><?php echo $berat; ?></td>
-                                            <td scope="col" style="max-width:90px;">
-                                                <h6 class="fw-bold"><?php echo do_shortcode("[harga]"); ?></h6>
-                                            </td>
+                                            <td><?php echo esc_html(get_post_meta(get_the_ID(), '_store_stock', true)); ?></td>
+                                            <td><?php echo $berat !== '' ? esc_html($berat) . ' kg' : ''; ?></td>
+                                            <td class="fw-bold"><?php echo do_shortcode('[wp_store_price]'); ?></td>
                                         </tr>
                                     <?php endwhile; ?>
                                 </tbody>
@@ -84,9 +72,12 @@ $search_query     = new WP_Query(array(
                             <h3 class="mt-2 mb-3"> Produk tidak ditemukan ! :(</h3>
                         </div>
                     <?php endif; ?>
+
                 </main><!-- #main -->
+
             </div><!-- #primary -->
-        </div><!-- .row -->
+
+        </div>
 
     </div><!-- #content -->
 

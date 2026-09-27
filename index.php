@@ -28,10 +28,10 @@ $container = velocitytheme_option('justg_container_type', 'container');
             <main class="site-main col order-2" id="main">
                 <?php require_once(get_stylesheet_directory() . '/inc/home-slider.php'); ?>
                 <div class="text-center">
-                    <h5 class="color-theme fw-bold"><?php echo get_option('blogname') . ' - ' . get_option('blogdescription'); ?></h5>
+                    <h5 class="color-theme fw-bold"><?php echo esc_html(trim(get_option('blogname') . ' - ' . get_option('blogdescription'), ' -')); ?></h5>
                 </div>
                 <div class="card mb-3 rounded-0 bg-gray border-0 color-theme py-2 px-3 fs-6 fw-bold">
-                    Produk Terbaru <?php echo get_option('blogname'); ?>
+                    Produk Terbaru <?php echo esc_html(get_option('blogname')); ?>
                 </div>
 
                 <?php

@@ -12,93 +12,6 @@ add_action('after_setup_theme', 'velocitychild_theme_setup', 9);
 function velocitychild_theme_setup()
 {
 
-    if (class_exists('Kirki')) :
-
-        Kirki::add_panel('panel_toko26', [
-            'priority'    => 10,
-            'title'       => esc_html__('Toko 26', 'justg'),
-            'description' => esc_html__('', 'justg'),
-        ]);
-
-        // section title_tagline
-        Kirki::add_section('title_tagline', [
-            'panel'    => 'panel_toko26',
-            'title'    => __('Site Identity', 'justg'),
-            'priority' => 10,
-        ]);
-        // section title_tagline
-        Kirki::add_section('header_image', [
-            'panel'    => 'panel_toko26',
-            'title'    => __('Header Image', 'justg'),
-            'priority' => 10,
-        ]);
-
-
-        ///Section Color
-        Kirki::add_section('section_colorweb', [
-            'panel'    => 'panel_toko26',
-            'title'    => __('Warna', 'justg'),
-            'priority' => 10,
-        ]);
-        new \Kirki\Field\Background(
-            [
-                'settings'    => 'background_website',
-                'label'       => esc_html__('Background', 'justg'),
-                'description' => esc_html__('', 'justg'),
-                'section'     => 'section_colorweb',
-                'default'     => [
-                    'background-color'      => '#ffffff',
-                    'background-image'      => '',
-                    'background-repeat'     => 'repeat',
-                    'background-position'   => 'center center',
-                    'background-size'       => 'cover',
-                    'background-attachment' => 'scroll',
-                ],
-                'transport'   => 'auto',
-                'output'      => [
-                    [
-                        'element'   => ':root[data-bs-theme=light] body',
-                    ],
-                ],
-            ]
-        );
-
-        ///Section Home
-        Kirki::add_section('section_homeweb', [
-            'panel'    => 'panel_toko26',
-            'title'    => __('Home', 'justg'),
-            'priority' => 10,
-        ]);
-        new \Kirki\Field\Repeater(
-            [
-                'settings' => 'slider_home',
-                'label'    => esc_html__('Slider Home', 'justg'),
-                'section'  => 'section_homeweb',
-                'priority' => 10,
-                'row_label'    => [
-                    'type'  => 'field',
-                    'value' => esc_html__('Slider', 'justg'),
-                ],
-                'button_label' => esc_html__('Tambah', 'justg'),
-                'fields'   => [
-                    'imgslider'   => [
-                        'type'        => 'image',
-                        'label'       => esc_html__('Gambar', 'justg'),
-                        'description' => esc_html__('', 'justg'),
-                        'default'     => '',
-                    ],
-                ],
-            ]
-        );
-
-
-        // remove panel in customizer 
-        Kirki::remove_panel('global_panel');
-        Kirki::remove_panel('panel_header');
-        Kirki::remove_panel('panel_footer');
-        Kirki::remove_control('display_header_text');
-
-    endif;
 
     //remove action from Parent Theme
     remove_action('justg_header', 'justg_header_menu');
@@ -147,64 +60,99 @@ function justg_after_wrapper_content()
 }
 
 
+/**
+ * Halaman Katalog & Profil Saya VD Store (Pengaturan VD Store > Halaman, halaman ber-[wp_store_catalog]
+ * / [wp_store_profile], atau template katalog tema) selalu tampil penuh tanpa sidebar.
+ */
+function velocity_toko26_halaman_penuh()
+{
+    if (!is_page()) {
+        return false;
+    }
+    $s = (array) get_option('wp_store_settings', []);
+    foreach (['page_catalog', 'page_profile'] as $kunci) {
+        if (!empty($s[$kunci]) && is_page((int) $s[$kunci])) {
+            return true;
+        }
+    }
+    $isi = (string) get_post_field('post_content', get_queried_object_id());
+    return has_shortcode($isi, 'wp_store_catalog') || has_shortcode($isi, 'wp_store_profile')
+        || strpos((string) get_page_template_slug(), 'katalog') !== false;
+}
+
+/**
+ * Arsip produk VD Store (/produk/, kategori, merek, pencarian produk): kolom kiri berisi daftar kategori +
+ * Filter & Urutkan, sidebar kanan disembunyikan supaya kartu produk tidak sempit.
+ */
+function velocity_toko26_halaman_arsip_produk()
+{
+    return is_post_type_archive('store_product') || is_tax(['store_product_cat', 'brand'])
+        || (is_search() && get_query_var('post_type') === 'store_product');
+}
+
+/**
+ * Daftar kategori produk untuk berpindah kategori di halaman arsip; kategori aktif ditandai.
+ */
+function velocity_toko26_kategori_filter()
+{
+    $kat = get_terms(['taxonomy' => 'store_product_cat', 'hide_empty' => false, 'orderby' => 'name']);
+    if (is_wp_error($kat) || !$kat) {
+        return '';
+    }
+    $aktif = is_tax('store_product_cat') ? (int) get_queried_object_id() : 0;
+    $induk_aktif = $aktif ? array_merge([$aktif], get_ancestors($aktif, 'store_product_cat')) : [];
+    $anak = [];
+    foreach ($kat as $k) {
+        $anak[(int) $k->parent][] = $k;
+    }
+    $item = function ($k, $tingkat) use (&$item, $anak, $aktif, $induk_aktif) {
+        $kelas = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center' . ($tingkat ? ' ps-4' : '')
+            . ((int) $k->term_id === $aktif ? ' active' : '');
+        $html = '<a class="' . $kelas . '" href="' . esc_url(get_term_link($k)) . '"' . ((int) $k->term_id === $aktif ? ' aria-current="page"' : '') . '>'
+            . esc_html($k->name) . '<span class="badge rounded-pill">' . (int) $k->count . '</span></a>';
+        if (!empty($anak[$k->term_id]) && in_array((int) $k->term_id, $induk_aktif, true)) {
+            foreach ($anak[$k->term_id] as $sub) {
+                $html .= $item($sub, $tingkat + 1);
+            }
+        }
+        return $html;
+    };
+    $semua = is_post_type_archive('store_product') && !$aktif;
+    $html = '<div class="toko26-kategori-filter wps-card wps-p-4"><div class="wps-text-lg wps-font-medium wps-mb-3 wps-text-bold">Kategori</div><div class="list-group list-group-flush">'
+        . '<a class="list-group-item list-group-item-action' . ($semua ? ' active' : '') . '" href="' . esc_url(get_post_type_archive_link('store_product')) . '"' . ($semua ? ' aria-current="page"' : '') . '>Semua Produk</a>';
+    foreach ($anak[0] ?? [] as $k) {
+        $html .= $item($k, 0);
+    }
+    return $html . '</div></div>';
+}
+
 if (!function_exists('justg_right_sidebar_check')) {
     /**
-     * Right sidebar check
-     * 
+     * Sidebar kanan: di arsip produk berisi kotak Kategori + Filter & Urutkan; di halaman lain
+     * main-sidebar (sidebar kiri demo toko26).
      */
     function justg_right_sidebar_check()
     {
-        if (is_singular('fl-builder-template')) {
+        if (is_singular('fl-builder-template') || velocity_toko26_halaman_penuh()) {
+            return;
+        }
+        if (velocity_toko26_halaman_arsip_produk()) {
+            echo '<div class="right-sidebar widget-area pe-md-2 col-sm-12 col-md-3 order-md-1 order-3 px-1" id="right-sidebar" role="complementary">';
+            echo '<aside class="mb-3">' . velocity_toko26_kategori_filter() . '</aside>';
+            echo '<aside class="mb-3 d-none d-md-block">';
+            echo do_shortcode('[wp_store_filters]');
+            echo '</aside>';
+            echo '</div>';
             return;
         }
         if (!is_active_sidebar('main-sidebar')) {
             return;
         }
-        // if (is_singular('product')) {
-        //     return;
-        // }
-        if (is_tax(array('merk', 'category-product'))) {
-            echo '<div class="right-sidebar widget-area pe-md-2 col-sm-12 col-md-3 order-md-1 order-3 px-1" id="right-sidebar" role="complementary">';
-            echo '<aside class="mb-3 d-none d-md-block">';
-            echo get_velocitytoko_part('public/templates/filter');
-            echo '</aside>';
-            echo '</div>';
-            return;
-        }
-
 ?>
         <div class="widget-area right-sidebar col-sm-3 order-md-1 order-3 px-1" id="right-sidebar" role="complementary">
             <div class="sticky-top">
                 <?php do_action('justg_before_main_sidebar'); ?>
                 <?php dynamic_sidebar('main-sidebar'); ?>
-                <?php do_action('justg_after_main_sidebar'); ?>
-            </div>
-        </div>
-    <?php
-    }
-}
-
-if (!function_exists('justg_left_sidebar_check')) {
-    /**
-     * Right sidebar check
-     * 
-     */
-    function justg_left_sidebar_check()
-    {
-        if (is_singular('fl-builder-template')) {
-            return;
-        }
-        if (!is_active_sidebar('secondary-sidebar')) {
-            return;
-        }
-        // if (is_singular('product')) {
-        //     return;
-        // }
-    ?>
-        <div class="widget-area left-sidebar col-sm-3 order-3 px-1" id="left-sidebar" role="complementary">
-            <div class="sticky-top">
-                <?php do_action('justg_before_main_sidebar'); ?>
-                <?php dynamic_sidebar('secondary-sidebar'); ?>
                 <?php do_action('justg_after_main_sidebar'); ?>
             </div>
         </div>
@@ -220,82 +168,4 @@ function vd_limit_text($text, $limit)
         $text  = substr($text, 0, $pos[$limit]) . '...';
     }
     return $text;
-}
-
-remove_action('velocitytoko_product_loop', 'velocitytoko_content_product', 20);
-add_action('velocitytoko_product_loop', 'velocitytoko26_content_product', 30);
-function velocitytoko26_content_product($post)
-{
-    if (is_singular('product')) :
-        $class = 'col-6 mb-2';
-    else :
-        $class = 'col-xl-3 col-md-3 col-6 mb-2';
-    endif;
-    ?>
-    <article <?php post_class($class); ?> id="post-<?php the_ID(); ?>">
-        <div class="card h-100 card-product rounded-0 p-2 overflow-hidden">
-            <?php echo do_shortcode("[thumbnail width='200' height='200' crop='false' upscale='true']"); ?>
-            <div class="card-body text-center position-relative p-0">
-                <a class="d-block my-2 fw-bold " style="min-height:3rem; max-height:4rem; overflow:hidden;" href="<?php echo get_the_permalink(); ?>">
-                    <?php echo get_the_title(); ?>
-                </a>
-                <div class="fw-bold">
-                    <?php echo do_shortcode("[harga]"); ?>
-                </div>
-                <div class="p-md-3 py-3 text-center">
-                    <a class="btn btn-sm btn-primary border-theme bg-theme shadow-sm" href="<?php echo get_the_permalink(); ?>">
-                        Detail
-                    </a>
-                    <?php echo do_shortcode("[beli class='btn btn-sm bg-theme text-white border-0 shadow-sm']");
-                    ?>
-                </div>
-            </div>
-        </div>
-    </article><!-- #post-## -->
-<?php
-}
-
-// single product
-remove_action('velocitytoko_content_single_product', 'velocitytoko_content_single_product', 20);
-add_action('velocitytoko_content_single_product', 'velocitytoko_content_single_products', 30);
-function velocitytoko_content_single_products($post)
-{ ?>
-    <article <?php post_class(); ?> id="post-<?php the_ID(); ?>">
-
-        <div class="block-primary">
-            <h6 class="fs-5 fw-bold mb-3">
-                <?php echo do_shortcode("[vtoko-title link='true' class='color-theme ' node-cart='cartsingle']"); ?>
-            </h6>
-            <div class="row">
-                <div class="col-md-6 col-xl-5">
-                    <?php echo do_shortcode('[slider-produk width="350" height="350"]'); ?>
-                </div>
-                <div class="col-md">
-                    <div class="mb-2">
-                        <small>
-                            Kategori: <?php echo velocitytoko_term_list('category-product', ",", get_the_ID()); ?>
-                            | Dilihat: <?php echo do_shortcode('[view]'); ?>
-                        </small>
-                    </div>
-                    <div class="single-harga mb-3">Harga: <?php echo do_shortcode('[harga node-cart="cartsingle"]'); ?></div>
-                    <div class="mb-3"><?php echo do_shortcode('[detail-produk]'); ?></div>
-                    <div class="d-flex align-items-center justify-content-start">
-                        <div class="mb-3"><?php echo do_shortcode('[beli class="btn btn-sm btn-dark p-2 border-0 shadow-sm" modal="false" node-cart="cartsingle" text="true"]'); ?></div>
-                        <div class="mb-3 ps-2"><?php echo do_shortcode('[love text="true"]'); ?></div>
-                    </div>
-                    <div class="mb-3"><?php echo do_shortcode('[beli-lain]'); ?></div>
-                    <div class="mb-3"><?php echo do_shortcode('[share]'); ?></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="block-primary pb-3">
-            <img src="<?php echo velocitytheme_option('banner_single'); ?>" />
-        </div>
-        <div class="block-primary pt-2">
-            <h6 class="title-single-part fs-5 fw-bold">Detail Produk</h6>
-            <div><?php echo get_the_content(); ?></div>
-        </div>
-    </article><!-- #post-## -->
-<?php
 }

@@ -39,8 +39,8 @@
     <?php if (has_header_image()) : ?>
         <div class="haeder-images">
             <?php
-            echo '<a class="d-block" href="' . get_home_url() . '">';
-            echo '<img class="w-100" src="' . esc_url(get_header_image()) . '" />';
+            echo '<a class="d-block" href="' . esc_url(home_url('/')) . '">';
+            echo '<img class="w-100" src="' . esc_url(get_header_image()) . '" alt="' . esc_attr(get_bloginfo('name')) . '" />';
             echo '</a>';
             ?>
         </div>

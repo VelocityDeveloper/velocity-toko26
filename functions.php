@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Child theme functions
  *
@@ -21,10 +20,13 @@
  */
 $inc = get_stylesheet_directory() . '/inc';
 $includes = [
-    'enqueue.php',
-    'function-child.php',
+	'enqueue.php',
+	'function-child.php',
+	'customizer.php',
+	'vd-store.php',
+	'popup.php',
 ];
 
 foreach ($includes as $include) {
-    require_once($inc . '/' . $include);
+	require_once($inc . '/' . $include);
 }

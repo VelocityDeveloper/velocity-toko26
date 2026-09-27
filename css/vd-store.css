@@ -1,0 +1,179 @@
+/* Toko 26 + VD Store: menyelaraskan komponen VD Store dengan tampilan Toko 26.
+   Warna utama/sekunder dicetak inc/customizer.php (--velocitytoko-color-main/-secondary). */
+
+.bg-colortheme,
+.page-item.active .page-link {
+    color: #fff !important;
+}
+
+/* Kartu produk */
+.card-product .wps-price-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0 .35rem;
+}
+/* Label produk di kiri atas gambar seperti demo (VD Store bawaan: kanan atas). */
+.card-product .wps-label-badge,
+.toko26-carousel-produk .wps-label-badge {
+    left: 8px !important;
+    right: auto !important;
+    border-radius: 4px !important;
+}
+.card-product .wps-price-text {
+    color: var(--bs-heading-color, #000) !important;
+}
+.single-produk .wps-price-text,
+.table .wps-price-text {
+    color: var(--velocitytoko-color-main) !important;
+}
+.toko26-info-terbaru a {
+    color: inherit;
+    text-decoration: none;
+}
+.card-product .cart-arsip {
+    padding: .25rem .5rem;
+}
+.card-product .wps-price-text {
+    font-size: 1em;
+}
+.card-product .wps-price-group .wps-text-gray-500 {
+    color: #dc3545 !important;
+    font-size: .75em !important;
+    font-weight: normal;
+}
+.card-product .btn {
+    white-space: nowrap;
+}
+.cart-arsip .velocity-toko26-beli {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    width: 100%;
+    color: #fff;
+    line-height: 1.5;
+    justify-content: center;
+}
+.cart-arsip .velocity-toko26-beli svg {
+    color: #fff;
+    stroke: #fff;
+}
+
+/* Detail produk */
+.single-produk .wps-price-group {
+    flex-direction: row;
+    align-items: baseline;
+}
+.single-produk .wps-wishlist-btn,
+.single-produk .wps-add-to-cart {
+    background-color: var(--velocitytoko-color-main);
+    border-color: var(--velocitytoko-color-main);
+    color: #fff;
+}
+.single-produk .wps-wishlist-btn svg,
+.single-produk .wps-add-to-cart svg {
+    color: #fff;
+    stroke: #fff;
+}
+.single-produk .wps-input-qty {
+    max-width: 70px;
+    text-align: center;
+}
+
+/* Widget: carousel produk & testimoni */
+.toko26-carousel-produk .carousel-control-prev,
+.toko26-carousel-produk .carousel-control-next,
+.toko26-testimoni .carousel-control-prev,
+.toko26-testimoni .carousel-control-next {
+    width: 12%;
+}
+.toko26-testimoni .carousel-control-prev-icon,
+.toko26-testimoni .carousel-control-next-icon {
+    filter: invert(1) grayscale(1);
+    width: 1rem;
+}
+.toko26-carousel-produk .wps-image-wrap {
+    border: 1px solid #ddd;
+}
+.vtoko-list-taxonomy .collapse-icon-toggle::after {
+    content: '';
+    display: inline-block;
+    width: .45rem;
+    height: .45rem;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: rotate(-45deg);
+    margin-right: .5rem;
+    transition: transform .2s;
+}
+.vtoko-list-taxonomy .collapse-icon-toggle:not(.collapsed)::after {
+    transform: rotate(45deg);
+}
+.vtoko-list-taxonomy a {
+    color: var(--bs-body-color);
+    text-decoration: none;
+}
+.vtoko-sosmed-item:hover {
+    filter: brightness(1.1);
+}
+.logo-ekspedisi img {
+    max-height: 40px;
+}
+
+/* Footer */
+.footer-widget .kontak-widget .btn {
+    color: var(--bs-body-color);
+}
+
+/* Filter VD Store di sidebar kategori: tombol Reset/Terapkan tidak meluber di kolom sempit. */
+.left-sidebar .wps-mt-4.wps-flex {
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+.left-sidebar .wps-mt-4.wps-flex .wps-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding-left: .5rem;
+    padding-right: .5rem;
+}
+.left-sidebar .wps-btn-primary {
+    background-color: var(--velocitytoko-color-main);
+    border-color: var(--velocitytoko-color-main);
+}
+
+/* Arsip produk: daftar kategori (pindah kategori) + tombol filter tidak keluar kotak. */
+.toko26-kategori-filter .list-group-item {
+    padding: .45rem .5rem;
+    border-color: #eee;
+}
+.toko26-kategori-filter .list-group-item.active {
+    color: #fff;
+    background-color: var(--velocitytoko-color-main);
+    border-color: var(--velocitytoko-color-main);
+}
+.toko26-kategori-filter .badge {
+    color: inherit;
+    background-color: rgba(0, 0, 0, .08);
+    font-weight: 500;
+}
+#right-sidebar form.wps-card .wps-mt-4.wps-flex {
+    flex-wrap: wrap !important;
+    gap: .5rem;
+}
+#right-sidebar form.wps-card .wps-mt-4.wps-flex > .wps-btn {
+    flex: 1 1 0 !important;
+    min-width: 0;
+    justify-content: center;
+    padding-left: .5rem !important;
+    padding-right: .5rem !important;
+    margin: 0 !important;
+}
+#right-sidebar form.wps-card .wps-btn svg {
+    flex-shrink: 0;
+}
+
+/* Harga kartu berwarna tema seperti demo toko26 (harga coret tetap merah). */
+.card-product .color-theme .wps-price-text {
+    color: var(--velocitytoko-color-main) !important;
+}

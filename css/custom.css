@@ -1,7 +1,6 @@
 :root {
     --color-theme: #20c1eb;
     --bs-body-font-size: .85rem !important;
-    --bs-body-font-family: Arial, Helvetica, sans-serif !important;
 }
 :root[data-bs-theme=light] {
     --bs-link-color: #333333 !important;
@@ -14,9 +13,6 @@
     line-height: 1.25rem !important;
 }
 :root[data-bs-theme=light] .navbar-dark { --bs-navbar-color: rgb(255 255 255); }
-body {
-    font-family: Arial, Helvetica, sans-serif !important;
-}
 small { font-size: .7rem !important; }
 
 .container { max-width: 1000px !important; }
